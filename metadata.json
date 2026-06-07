@@ -1,0 +1,6 @@
+{
+  "name": "Meu Controle Financeiro",
+  "description": "Um web app completo, simples e funcional para controle de gastos pessoais",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

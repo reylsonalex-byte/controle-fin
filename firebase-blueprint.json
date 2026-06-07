@@ -1,0 +1,115 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile metadata",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The Firebase User UID matching authentication"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of creation"
+        }
+      },
+      "required": ["userId", "email"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial entry representing income or expense",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["entrada", "saída"] },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "paymentMethod": { "type": "string" },
+        "notes": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "type", "description", "amount", "category", "date", "paymentMethod", "userId"]
+    },
+    "Debt": {
+      "title": "Debt",
+      "description": "Debts or accounts payable/receivable registration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "dueDate": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["pendente", "parcial", "paga"] },
+        "notes": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "totalAmount", "paidAmount", "dueDate", "status", "userId"]
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "Financial saving cofrinho or goal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "targetAmount": { "type": "number" },
+        "currentAmount": { "type": "number" },
+        "deadline": { "type": "string", "format": "date" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "targetAmount", "currentAmount", "deadline", "userId"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Estimated income, default monthly savings goal, theme, and profile settings",
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string" },
+        "estimatedMonthlyIncome": { "type": "number" },
+        "defaultMonthlySavingsGoal": { "type": "number" },
+        "theme": { "type": "string", "enum": ["dark", "light"] },
+        "currency": { "type": "string" },
+        "userId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userName", "estimatedMonthlyIncome", "defaultMonthlySavingsGoal", "theme", "currency", "userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Root user profile document"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Collection of transaction records for the specific user"
+    },
+    "/users/{userId}/debts/{debtId}": {
+      "schema": "Debt",
+      "description": "Collection of account payable and debt records for the specific user"
+    },
+    "/users/{userId}/goals/{goalId}": {
+      "schema": "Goal",
+      "description": "Collection of saving goals for the specific user"
+    },
+    "/users/{userId}/settings/{settingsId}": {
+      "schema": "Settings",
+      "description": "User preference configurations document"
+    }
+  }
+}

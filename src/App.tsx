@@ -113,8 +113,16 @@ export default function App() {
         console.log("Sincronizando dados locais com o Firebase...");
         
         // Settings doc
-        const settingsDocPath = doc(db, 'users', currentUid, 'settings', 'config');
-        await setDoc(settingsDocPath, { ...localSettings, userId: currentUid, updatedAt: new Date().toISOString() });
+        const settingsDocPath = doc(db, 'users', currentUid, 'settings', 'profile');
+        await setDoc(settingsDocPath, {
+          displayName: localSettings.userName,
+          estimatedMonthlyIncome: Number(localSettings.estimatedMonthlyIncome),
+          defaultSavingsGoal: Number(localSettings.defaultMonthlySavingsGoal),
+          theme: localSettings.theme,
+          currency: localSettings.currency || 'BRL',
+          userId: currentUid,
+          updatedAt: new Date().toISOString()
+        });
 
         // Transactions
         for (const t of localTx) {
@@ -166,13 +174,28 @@ export default function App() {
     if (!user) return;
 
     // 1. Settings Doc Snapshot Listener
-    const settingsDocPath = `users/${user.uid}/settings/config`;
+    const settingsDocPath = `users/${user.uid}/settings/profile`;
     const unsubscribeSettings = onSnapshot(doc(db, settingsDocPath), (snapshot) => {
       if (snapshot.exists()) {
-        setSettings(snapshot.data() as Settings);
+        const data = snapshot.data();
+        setSettings({
+          userName: data?.displayName || data?.userName || '',
+          estimatedMonthlyIncome: Number(data?.estimatedMonthlyIncome !== undefined ? data.estimatedMonthlyIncome : DEFAULT_SETTINGS.estimatedMonthlyIncome),
+          defaultMonthlySavingsGoal: Number(data?.defaultSavingsGoal !== undefined ? data.defaultSavingsGoal : (data?.defaultMonthlySavingsGoal !== undefined ? data.defaultMonthlySavingsGoal : DEFAULT_SETTINGS.defaultMonthlySavingsGoal)),
+          theme: data?.theme || 'dark',
+          currency: data?.currency || 'BRL'
+        });
       } else {
         // Doc doesn't exist yet, establish with defaults
-        const initialSettings = { ...settings, userId: user.uid, updatedAt: new Date().toISOString() };
+        const initialSettings = {
+          displayName: settings.userName,
+          estimatedMonthlyIncome: Number(settings.estimatedMonthlyIncome),
+          defaultSavingsGoal: Number(settings.defaultMonthlySavingsGoal),
+          theme: settings.theme,
+          currency: settings.currency || 'BRL',
+          userId: user.uid,
+          updatedAt: new Date().toISOString()
+        };
         setDoc(doc(db, settingsDocPath), initialSettings).catch(err => {
           handleFirestoreError(err, OperationType.WRITE, settingsDocPath);
         });
@@ -466,9 +489,17 @@ export default function App() {
   // ==========================================
   const handleUpdateSettings = async (newSettings: Settings) => {
     if (user) {
-      const docPath = `users/${user.uid}/settings/config`;
+      const docPath = `users/${user.uid}/settings/profile`;
       try {
-        await setDoc(doc(db, docPath), { ...newSettings, userId: user.uid, updatedAt: new Date().toISOString() });
+        await setDoc(doc(db, docPath), {
+          displayName: newSettings.userName,
+          estimatedMonthlyIncome: Number(newSettings.estimatedMonthlyIncome),
+          defaultSavingsGoal: Number(newSettings.defaultMonthlySavingsGoal),
+          theme: newSettings.theme,
+          currency: newSettings.currency || 'BRL',
+          userId: user.uid,
+          updatedAt: new Date().toISOString()
+        });
       } catch (err) {
         handleFirestoreError(err, OperationType.WRITE, docPath);
       }
@@ -528,8 +559,16 @@ export default function App() {
                   const docPath = `users/${user.uid}/goals/${g.id}`;
                   await setDoc(doc(db, docPath), { ...g, userId: user.uid });
                 }
-                const settingsDocPath = `users/${user.uid}/settings/config`;
-                await setDoc(doc(db, settingsDocPath), { ...parsed.settings, userId: user.uid });
+                const settingsDocPath = `users/${user.uid}/settings/profile`;
+                await setDoc(doc(db, settingsDocPath), {
+                  displayName: parsed.settings.userName || parsed.settings.displayName || '',
+                  estimatedMonthlyIncome: Number(parsed.settings.estimatedMonthlyIncome !== undefined ? parsed.settings.estimatedMonthlyIncome : DEFAULT_SETTINGS.estimatedMonthlyIncome),
+                  defaultSavingsGoal: Number(parsed.settings.defaultSavingsGoal !== undefined ? parsed.settings.defaultSavingsGoal : (parsed.settings.defaultMonthlySavingsGoal !== undefined ? parsed.settings.defaultMonthlySavingsGoal : DEFAULT_SETTINGS.defaultMonthlySavingsGoal)),
+                  theme: parsed.settings.theme || 'dark',
+                  currency: parsed.settings.currency || 'BRL',
+                  userId: user.uid,
+                  updatedAt: new Date().toISOString()
+                });
               } else {
                 // local fallback
                 setTransactions(parsed.transactions);
@@ -556,7 +595,7 @@ export default function App() {
     if (user) {
       try {
         // Delete Settings Config
-        await deleteDoc(doc(db, 'users', user.uid, 'settings', 'config'));
+        await deleteDoc(doc(db, 'users', user.uid, 'settings', 'profile'));
 
         // Delete Transactions
         const txSnap = await getDocs(collection(db, 'users', user.uid, 'transactions'));

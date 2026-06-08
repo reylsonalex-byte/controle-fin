@@ -137,7 +137,7 @@ export default function Navigation({
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-danger/10 text-danger hover:bg-danger hover:text-white py-2 px-3 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span>Sair da Conta Google</span>
+              <span>Sair da Conta</span>
             </button>
           ) : (
             <button
